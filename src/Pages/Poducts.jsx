@@ -1,27 +1,48 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Card from 'react-bootstrap/Card';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import {getAllProducts} from '../redux/slices/productSlice';
+import { all } from 'axios';
 
 function Products() {
-    return (
-        <>
-            <div className='m-5'>
-                <div className="row pt-5">
+
+const {loading,allProducts,error} = useSelector(state=>state.productReducer)
+
+const dispatch=useDispatch()
+
+useEffect(()=>{
+  dispatch(getAllProducts())
+},[])
+
+return (
+    <div className='m-5'>
+        {
+            loading
+                ? <div className='text-center py-5 fw-bolder'>Loading...</div>
+                : <div className='row pt-5'>
                     {/* Duplicate column according to products */}
-                    <div className="col-3">
-                        {/* Cards */}
-                        <Card className='shadow p-2'>
-                            <Card.Img style={{height:"250px"}} variant="top" src="https://www.chanel.com/images/t_one/w_0.51,h_0.51,c_crop/q_auto:good,f_auto,fl_lossy,dpr_1.1/w_1920/chance-eau-tendre-eau-de-parfum-spray-3-4fl-oz--packshot-default-126260-9564866838558.jpg" />
-                            <Card.Body className="text-center">
-                                <Card.Title>Card Title</Card.Title>
-                                <Link to={'/products/:id'} className='btn btn-primary'>View More</Link>
-                            </Card.Body>
-                        </Card>
-                    </div>
+                    {
+                        allProducts.length > 0 ?
+                            allProducts.map(product => (
+                                <div key={product?.id} className="col-3">
+                                    {/* Cards */}
+                                    <Card className='shadow p-2'>
+                                        <Card.Img style={{height:"250px"}} variant="top" src={product?.thumbnail} />
+                                        <Card.Body className='text-center'>
+                                            <Card.Title>{product?.title}</Card.Title>
+                                            <Link to={`/products/${product?.id}`} className='btn btn-primary'>View More</Link>
+                                        </Card.Body>
+                                    </Card>
+                                </div>
+                            ))
+                            :
+                            <div className='fw-bolder'>No products found</div>
+                    }
                 </div>
-            </div>
-        </>
-    )
+        }
+    </div>
+)
 }
 
 export default Products
